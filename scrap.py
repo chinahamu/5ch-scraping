@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import sys, codecs
-import argparse    # 1. argparseをインポート
+import argparse
 
 parser = argparse.ArgumentParser(description='5chスクレイピングスクリプト')
 
