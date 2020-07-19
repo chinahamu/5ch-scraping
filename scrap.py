@@ -67,6 +67,8 @@ while 1:
 		p = p + 1
 
 		time.sleep(2)
+	else:
+		break
 
 thread = []
 print("2chURL")
