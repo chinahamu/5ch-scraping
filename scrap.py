@@ -79,6 +79,7 @@ for t in title_list:
 	thread_raw = soup.select("#thread-contents > div > div:nth-child(2) > div:nth-child(1) > div.thread-nav > div > a:nth-child(1)")[0].get("href")
 	print(thread_raw)
 	thread.append(thread_raw)
+	time.sleep(2)
 
 
 file = open(file_dir, 'a')
@@ -91,6 +92,7 @@ for th in thread:
 	raw = soup.find_all("dd")
 	for r in raw:
 		file.write(r.text)
+	time.sleep(2)
 
 file.close()
 print("終了")
