@@ -3,6 +3,45 @@ from bs4 import BeautifulSoup
 import sys, codecs
 import argparse
 import time
+from datetime import datetime as dt
+
+
+def is_inrange(date_from,date_to,date):
+	
+
+	date = dt.strptime(date[0:11].strip(), '%Y-%m-%d')
+
+	#print(date_from,date_to,date)
+
+	if(date_from == 0 and date_to == 0):
+		return True
+	
+	elif(date_from != 0 and date_to == 0):
+		date_from = dt.strptime(date_from.strip(), '%Y-%m-%d')		
+		date_to = date.today()
+
+		if(date_from >= date and date_to <= date):
+			return True
+		else:
+			return False
+	
+	elif(date_from == 0 and date_to != 0):
+		date_to = dt.strptime(date_to.strip(), '%Y-%m-%d')
+		
+		if(date_to <= date):
+			return True
+		else:
+			return False
+
+	elif(date_from != 0 and date_to != 0):
+		date_from = dt.strptime(date_from.strip(), '%Y-%m-%d')
+		date_to = dt.strptime(date_to.strip(), '%Y-%m-%d')
+
+		if(date_from >= date and date_to <= date):
+			return True
+		else:
+			return False
+
 
 parser = argparse.ArgumentParser(description='5chスクレイピングスクリプト')
 
@@ -13,7 +52,8 @@ parser.add_argument('--order', choices=['desc', 'asc'], default='desc', help="de
 parser.add_argument('--sr', default=1, help="何レス以上のスレを取得するか")
 parser.add_argument('--active', choices=[0,1], default=2, help="0=過去スレのみ,1=現行のみ,2=すべて")
 parser.add_argument('--limit', default=0, help="何スレッド目まで取得するか")
-
+parser.add_argument('--date_from', default=0, help="いつから")
+parser.add_argument('--date_to', default=0, help="いつまで")
 
 args = parser.parse_args()
 
@@ -24,17 +64,14 @@ order = args.order
 sr = str(args.sr)
 active = str(args.active)
 limit = args.limit
+date_from = args.date_from
+date_to = args.date_to
+
 
 if(active == "2"):
 	parameter = "q="+keyword+"&sort="+sort+"&order="+order+"&sr="+sr
 else:
 	parameter = "q="+keyword+"&sort="+sort+"&order="+order+"&sr="+sr+"&active="+active
-
-
-
-print(type(limit))
-
-
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
 print('https://www.logsoku.com/search?'+parameter)
@@ -51,17 +88,21 @@ while 1:
 		soup = BeautifulSoup(res.text, 'html.parser')
 
 		title_text = soup.find_all("a", class_="thread")
+		date_text = soup.find_all(class_="date")
 
 		i = 0
+		j = 1
 		for t in title_text:
-			if(limit != 0 and thead_count >= int(limit)):
+			inrange = is_inrange(date_to,date_from,date_text[j].text)
+			if(limit != 0 and thead_count >= int(limit) or thead_count >= 1 and inrange == False):
 				break
-			else:
+			elif(inrange == True):
 				title_list.append(title_text[i].get("href"))
 				i = i + 1
 				thead_count = thead_count + 1
+			j = j + 1
 
-		if(limit != 0 and thead_count >= int(limit)):
+		if(limit != 0 and thead_count >= int(limit) or thead_count >= 1 and inrange == False):
 			break
 
 		p = p + 1
